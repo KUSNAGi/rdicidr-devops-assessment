@@ -1,0 +1,5 @@
+node_modules/
+.terraform/
+*.zip
+.DS_Store
+.env
