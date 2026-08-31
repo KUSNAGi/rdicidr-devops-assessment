@@ -1,0 +1,7 @@
+node_modules
+build
+.git
+.env
+terraform
+.terraform
+.terraform.lock.hcl
