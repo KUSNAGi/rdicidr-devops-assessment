@@ -59,6 +59,7 @@ resource "aws_iam_role_policy" "ecs_task_execution_policy" {
       {
         Effect = "Allow"
         Action = [
+          "ecr:GetAuthorizationToken",
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
           "ecr:BatchCheckLayerAvailability",
@@ -94,6 +95,14 @@ resource "aws_ecs_task_definition" "app" {
       name      = var.app_name
       image     = var.container_image
       essential = true
+
+      portMappings = [
+        {
+          containerPort = var.container_port
+          hostPort      = var.container_port
+          protocol      = "tcp"
+        }
+      ]
 
       logConfiguration = {
         logDriver = "awslogs"
@@ -188,10 +197,5 @@ resource "aws_ecs_service" "app" {
     target_group_arn = aws_lb_target_group.app.arn
     container_name   = var.app_name
     container_port   = var.container_port
-  }
-
-  # Prevent Terraform from overriding autoscaling-managed task count
-  lifecycle {
-    ignore_changes = [desired_count, task_definition]
   }
 }
