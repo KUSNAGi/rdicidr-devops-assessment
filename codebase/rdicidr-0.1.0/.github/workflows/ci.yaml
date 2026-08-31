@@ -4,10 +4,14 @@ on:
   push:
     branches:
       - main
-      - 'feature-*'
+      - devel
+      - 'feature/**'
+      - 'bugfix/**'
   pull_request:
     branches:
       - main
+      - devel
+      - stage
 
 jobs:
   install:
@@ -19,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '15.5.1'
 
       - name: Install dependencies
         run: npm install
@@ -40,7 +44,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '15.5.1'
 
       - name: Restore node_modules
         uses: actions/cache/restore@v3
@@ -55,7 +59,7 @@ jobs:
         run: npm run prettier
 
   test:
-    needs: [install]
+    needs: [lint]
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -64,7 +68,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '15.5.1'
 
       - name: Restore node_modules
         uses: actions/cache/restore@v3
@@ -75,10 +79,11 @@ jobs:
       - name: Run tests
         env:
           CI: true
+          REACT_APP_API_URL: https://api.rdicidr.com
         run: npm run test
 
   build:
-    needs: [lint]
+    needs: [test]
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -87,13 +92,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '15.5.1'
 
       - name: Restore node_modules
         uses: actions/cache/restore@v3
         with:
           path: node_modules
-          key: deps-${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: Build project
         run: npm run build
